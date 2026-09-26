@@ -1,11 +1,12 @@
 import React from "react";
+import Banner from "../../components/Banner/Banner";
 import CategoryNav from "../../components/CategoryNav/CategoryNav";
 
 const Home = () => {
     return (
         <div className="pt-24">
             <CategoryNav />
-            <h1>OLX Home page</h1>
+            <Banner />
         </div>
     )
 }
