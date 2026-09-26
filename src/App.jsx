@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Login from './components/Modal/Login';
 import Navbar from './components/Navbar/Navbar'
 import { useAuth } from './context/AuthContext';
+import Home from './pages/Home/Home';
 
 const App = () => {
 
@@ -16,6 +17,7 @@ const App = () => {
   return (
     <div>
       <Navbar toggleModal = {toggleModal} />
+      <Home />
     <Login toggleModal = {toggleModal} status = {openModal} />
     </div>
   )
