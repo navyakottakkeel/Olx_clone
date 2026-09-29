@@ -5,10 +5,13 @@ import search from "../../assets/search1.svg";
 import arrow from "../../assets/arrow-down.svg";
 import searchwt from "../../assets/search.svg";
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ toggleModal }) => {
   const { user, logout } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     setShowMenu(false);
@@ -80,6 +83,13 @@ const Navbar = ({ toggleModal }) => {
 
                 <button className="block w-full text-left px-4 py-3 hover:bg-gray-100">
                   My Ads
+                </button>
+
+                <button
+                  onClick={() => navigate("/wishlist")}
+                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
+                >
+                  My Wishlist
                 </button>
 
                 <button

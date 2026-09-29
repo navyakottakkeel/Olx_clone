@@ -1,11 +1,29 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useWishlist } from "../../context/WishlistContext";
 
 const ProductCard = ({ id, title, price, location, image, category, date }) => {
+
   const navigate = useNavigate();
+
+  const {wishlist, setWishlist} = useWishlist();
+
+  const handleWishlist = () => {
+    const alreadyExists = wishlist.some((product) => product.id === id )
+
+    if(alreadyExists){
+      setWishlist(wishlist.filter((product) => product.id !== id))
+      return;
+    } 
+
+    setWishlist([...wishlist, {id, title, price, location, image, category, date}])
+  }
+
+  const isWishlisted = wishlist.some((product) => product.id === id)
+
   return (
     <div
-      onClick={() => navigate(`product/${id}`)}
+      onClick={() => navigate(`/product/${id}`)}
       className="cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-md"
     >
       <div className="relative">
@@ -13,10 +31,14 @@ const ProductCard = ({ id, title, price, location, image, category, date }) => {
 
         <button
           type="button"
+          onClick={ (event) => {
+            event.stopPropagation()
+            handleWishlist()
+          }}
           className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white text-xl shadow-md transition hover:scale-110"
           aria-label={`Add ${title} to wishlist`}
         >
-          ♡
+         {isWishlisted ? "❤️" : "♡"}
         </button>
       </div>
       <div className="p-4">

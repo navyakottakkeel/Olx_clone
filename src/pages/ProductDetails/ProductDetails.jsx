@@ -1,12 +1,15 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useWishlist } from "../../context/WishlistContext";
 import products from "../../data/products";
 
 const ProductDetails = () => {
   const [showContactModal, setShowContactModal] = useState(false);
   const [message, setMessage] = useState("");
   const [messageError, setMessageError] = useState('')
+
+  const {wishlist, setWishlist} = useWishlist();
 
   useEffect(() => {
     const handleEscape = (event) => {
@@ -39,6 +42,18 @@ const ProductDetails = () => {
   const { id } = useParams();
   const productId = Number(id);
   const product = products.find((product) => product.id === productId);
+
+  const handleWishlist = () => {
+    const alreadyExists = wishlist.some((item) => item.id === product.id);
+    if(alreadyExists){
+      setWishlist(wishlist.filter((item) => item.id !== product.id));
+      return;
+    }
+    setWishlist([...wishlist, product])
+  }
+
+  const isWishlisted = wishlist.some((item) => item.id === product.id)
+
 
   if (!product) {
     return (
@@ -93,10 +108,14 @@ const ProductDetails = () => {
 
               <div className="flex items-center gap-3">
                 <button
+                onClick={(event) => {
+                  event.stopPropagation()
+                  handleWishlist()
+                }}
                   className="text-2xl text-gray-600 hover:text-[#002f34]"
                   aria-label="Add to wishlist"
                 >
-                  ♡
+                  {isWishlisted ? "❤️" : "♡"}
                 </button>
 
                 <button

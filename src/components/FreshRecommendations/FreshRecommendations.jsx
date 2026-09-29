@@ -2,8 +2,6 @@ import React from "react";
 import products from "../../data/products";
 import ProductCard from "../ProductCard/ProductCard";
 
-
-
 const FreshRecommendations = () => {
   return (
     <section className="px-4 py-8">
