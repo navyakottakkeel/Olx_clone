@@ -7,9 +7,9 @@ import products from "../../data/products";
 const ProductDetails = () => {
   const [showContactModal, setShowContactModal] = useState(false);
   const [message, setMessage] = useState("");
-  const [messageError, setMessageError] = useState('')
+  const [messageError, setMessageError] = useState("");
 
-  const {wishlist, setWishlist} = useWishlist();
+  const { wishlist, setWishlist } = useWishlist();
 
   useEffect(() => {
     const handleEscape = (event) => {
@@ -19,19 +19,19 @@ const ProductDetails = () => {
         setShowContactModal(false);
       }
     };
-  
+
     document.addEventListener("keydown", handleEscape);
-  
+
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
   }, []);
 
   const handleSendMessage = () => {
-    if (!message.trim()){
-      setMessageError('Please enter Message');
+    if (!message.trim()) {
+      setMessageError("Please enter Message");
       return;
-    } 
+    }
     alert("Message Send Successfully");
     setMessage("");
     setShowContactModal(false);
@@ -40,20 +40,25 @@ const ProductDetails = () => {
   const navigate = useNavigate();
 
   const { id } = useParams();
-  const productId = Number(id);
-  const product = products.find((product) => product.id === productId);
+
+  const staticProduct = products.find((product) => String(product.id) === id);
+
+  const savedAds = JSON.parse(localStorage.getItem("myads")) || [];
+
+  const postedAd = savedAds.find((ad) => String(ad.id) === id);
+
+  const product = staticProduct || postedAd;
 
   const handleWishlist = () => {
     const alreadyExists = wishlist.some((item) => item.id === product.id);
-    if(alreadyExists){
+    if (alreadyExists) {
       setWishlist(wishlist.filter((item) => item.id !== product.id));
       return;
     }
-    setWishlist([...wishlist, product])
-  }
+    setWishlist([...wishlist, product]);
+  };
 
-  const isWishlisted = wishlist.some((item) => item.id === product.id)
-
+  const isWishlisted = wishlist.some((item) => item.id === product.id);
 
   if (!product) {
     return (
@@ -108,10 +113,10 @@ const ProductDetails = () => {
 
               <div className="flex items-center gap-3">
                 <button
-                onClick={(event) => {
-                  event.stopPropagation()
-                  handleWishlist()
-                }}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleWishlist();
+                  }}
                   className="text-2xl text-gray-600 hover:text-[#002f34]"
                   aria-label="Add to wishlist"
                 >
@@ -128,7 +133,9 @@ const ProductDetails = () => {
             </div>
 
             <p className="mt-6 border-t border-gray-200 pt-6 text-3xl font-bold text-[#002f34]">
-              {product?.price}
+              {typeof product.price === "number"
+                ? `₹${product.price.toLocaleString("en-IN")}`
+                : product.price}
             </p>
 
             <div className="mt-6">
@@ -174,11 +181,11 @@ const ProductDetails = () => {
 
                 <div>
                   <p className="font-semibold text-gray-800">
-                    {product?.seller?.name}
+                    {product?.seller?.name || "Seller"}
                   </p>
 
                   <p className="mt-1 text-sm text-gray-500">
-                    Member since {product?.seller?.memberSince}
+                    Member since {product?.seller?.memberSince || "Recently"}
                   </p>
                 </div>
               </div>
@@ -212,7 +219,7 @@ const ProductDetails = () => {
           onClick={() => {
             setShowContactModal(false);
             setMessage("");
-            setMessageError("")
+            setMessageError("");
           }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
         >
@@ -229,7 +236,7 @@ const ProductDetails = () => {
                 onClick={() => {
                   setShowContactModal(false);
                   setMessage("");
-                  setMessageError("")
+                  setMessageError("");
                 }}
                 className="text-2xl text-gray-500 hover:text-gray-800"
                 aria-label="Close contact modal"
@@ -248,12 +255,18 @@ const ProductDetails = () => {
             <div className="mt-5 rounded-md bg-gray-100 p-4">
               <p className="text-sm font-semibold text-gray-700">📞 Phone</p>
 
-              <a
-                href={`tel:${product?.seller?.phone}`}
-                className="mt-1 block text-sm font-medium text-[#002f34] hover:underline"
-              >
-                {product?.seller?.phone}
-              </a>
+              {product?.seller?.phone ? (
+                <a
+                  href={`tel:${product.seller.phone}`}
+                  className="mt-1 block text-sm font-medium text-[#002f34] hover:underline"
+                >
+                  {product.seller.phone}
+                </a>
+              ) : (
+                <p className="mt-1 text-sm text-gray-500">
+                  Phone number not available
+                </p>
+              )}
             </div>
 
             <div className="mt-5">
@@ -268,8 +281,8 @@ const ProductDetails = () => {
                 id="seller-message"
                 value={message}
                 onChange={(event) => {
-                  setMessage(event.target.value)
-                  setMessageError("")
+                  setMessage(event.target.value);
+                  setMessageError("");
                 }}
                 placeholder="Hi, is this product still available?"
                 rows="4"
