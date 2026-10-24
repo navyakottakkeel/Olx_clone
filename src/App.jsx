@@ -6,6 +6,8 @@ import Navbar from "./components/Navbar/Navbar";
 import { useAuth } from "./context/AuthContext";
 import { WishlistProvider } from "./context/WishlistContext";
 import Home from "./pages/Home/Home";
+import MyAds from "./pages/MyAds/MyAds";
+import PostAd from "./pages/PostAd/PostAd";
 import ProductDetails from "./pages/ProductDetails/ProductDetails";
 import Wishlist from "./pages/Wishlist/Wishlist";
 
@@ -26,6 +28,8 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/my-ads" element={<MyAds />} />
+            <Route path="/post-ad" element={<PostAd />} />
           </Routes>
           <Login toggleModal={toggleModal} status={openModal} />
         </div>

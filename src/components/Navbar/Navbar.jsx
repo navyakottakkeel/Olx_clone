@@ -81,7 +81,9 @@ const Navbar = ({ toggleModal }) => {
                   My Profile
                 </button>
 
-                <button className="block w-full text-left px-4 py-3 hover:bg-gray-100">
+                <button
+                onClick={() => navigate("/my-ads")}
+                className="block w-full text-left px-4 py-3 hover:bg-gray-100">
                   My Ads
                 </button>
 
