@@ -1,9 +1,11 @@
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const MyAds = () => {
   const [ads, setAds] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedAds = JSON.parse(localStorage.getItem("myads")) || [];
@@ -14,11 +16,11 @@ const MyAds = () => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this ad?"
     );
-  
+
     if (!confirmDelete) {
       return;
     }
-    
+
     const updatedAds = ads.filter((ad) => ad.id !== id);
     localStorage.setItem("myads", JSON.stringify(updatedAds));
     setAds(updatedAds);
@@ -64,12 +66,21 @@ const MyAds = () => {
                   Category: {ad.category}
                 </p>
 
-                <button
-                  onClick={() => handleDelete(ad.id)}
-                  className="mt-4 w-full rounded-md bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-700"
-                >
-                  Delete
-                </button>
+                <div className="mt-4 flex gap-3">
+                  <button
+                    onClick={() => navigate(`/post-ad?editId=${ad.id}`)}
+                    className="flex-1 rounded-md bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(ad.id)}
+                    className="flex-1 rounded-md bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           ))}

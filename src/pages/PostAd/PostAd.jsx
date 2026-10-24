@@ -1,43 +1,98 @@
-import React from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 const PostAd = () => {
+  const navigate = useNavigate();
+
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get("editId");
+
   const [formData, setFormData] = useState({
-    title : '',
-    price : '',
-    image : '',
-    location : '',
-    category : '',
-    description : ''
+    title: "",
+    price: "",
+    image: "",
+    location: "",
+    category: "",
+    description: "",
   });
+
+  useEffect(() => {
+    if (!editId) return;
+
+    const savedAds = JSON.parse(localStorage.getItem("myads")) || [];
+
+    const selectedAd = savedAds.find((ad) => ad.id === editId);
+
+    if (selectedAd) {
+      setFormData({
+        title: selectedAd.title,
+        price: selectedAd.price.toString(),
+        image: selectedAd.image,
+        location: selectedAd.location,
+        category: selectedAd.category,
+        description: selectedAd.description,
+      });
+    }
+  }, [editId]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const {title, price, image, location, category, description} = formData;
+    const { title, price, image, location, category, description } = formData;
 
-    if(!title || !price || !image || !location || !category || !description){
-      alert('Please fill all fields');
+    if (
+      !title.trim() ||
+      !price ||
+      Number(price) <= 0 ||
+      !image.trim() ||
+      !location.trim() ||
+      !category ||
+      !description.trim()
+    ) {
+      alert("Please fill in all fields with valid information.");
       return;
     }
 
     const existingAds = JSON.parse(localStorage.getItem("myads")) || [];
 
-    const newAd = {
-      id: Date.now().toString(),
-      ...formData,
-      price: Number(price),
-      date: new Date().toISOString(),
+    if (editId) {
+      const adExists = existingAds.some((ad) => ad.id === editId);
+
+      if (!adExists) {
+        alert("This ad could not be found.");
+        return;
+      }
+
+      const updatedAds = existingAds.map((ad) =>
+        ad.id === editId
+          ? {
+              ...ad,
+              ...formData,
+              price: Number(price),
+            }
+          : ad
+      );
+
+      localStorage.setItem("myads", JSON.stringify(updatedAds));
+
+      alert("Your ad has been updated successfully!");
+
+      navigate("/my-ads");
+    } else {
+      const newAd = {
+        id: Date.now().toString(),
+        ...formData,
+        price: Number(price),
+        date: new Date().toISOString(),
+      };
+
+      const updatedAds = [...existingAds, newAd];
+
+      localStorage.setItem("myads", JSON.stringify(updatedAds));
+
+      alert("Your ad has been posted successfully!");
     }
-
-    const updatedAds = [...existingAds, newAd];
-
-    localStorage.setItem("myads", JSON.stringify(updatedAds));
-
-    alert("Your ad has been posted successfully!");
-
-    console.log(formData)
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 pb-8 pt-24">
@@ -48,9 +103,10 @@ const PostAd = () => {
           Create an advertisement to sell your product.
         </p>
 
-        <form 
-        onSubmit={handleSubmit}
-        className="mt-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <form
+          onSubmit={handleSubmit}
+          className="mt-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+        >
           <div>
             <label
               htmlFor="title"
@@ -65,8 +121,9 @@ const PostAd = () => {
               name="title"
               placeholder="e.g. iPhone 13"
               value={formData.title}
-              onChange={(e) => 
-              setFormData({...formData, title:e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               className="w-full rounded-md border border-gray-300 px-4 py-3 outline-none focus:border-gray-500"
             />
           </div>
@@ -86,8 +143,9 @@ const PostAd = () => {
               placeholder="Enter your price"
               min="1"
               value={formData.price}
-              onChange={(e) => 
-              setFormData({...formData, price:e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, price: e.target.value })
+              }
               className="w-full rounded-md border border-gray-300 px-4 py-3 outline-none focus:border-gray-500"
             />
           </div>
@@ -106,8 +164,9 @@ const PostAd = () => {
               name="image"
               placeholder="Enter your product image URL"
               value={formData.image}
-              onChange={(e) => 
-              setFormData({...formData, image:e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, image: e.target.value })
+              }
               className="w-full rounded-md border border-gray-300 px-4 py-3 outline-none focus:border-gray-500"
             />
           </div>
@@ -126,8 +185,9 @@ const PostAd = () => {
               name="location"
               placeholder="e.g. Kannur, Kerala"
               value={formData.location}
-              onChange={(e) => 
-              setFormData({...formData, location:e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, location: e.target.value })
+              }
               className="w-full rounded-md border border-gray-300 px-4 py-3 outline-none focus:border-gray-500"
             />
           </div>
@@ -144,8 +204,9 @@ const PostAd = () => {
               id="category"
               name="category"
               value={formData.category}
-              onChange={(e) => 
-              setFormData({...formData, category:e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, category: e.target.value })
+              }
               className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 outline-none focus:border-gray-500"
             >
               <option value="" disabled>
@@ -177,8 +238,9 @@ const PostAd = () => {
               rows="4"
               placeholder="Describe your product..."
               value={formData.description}
-              onChange={(e) => 
-              setFormData({...formData, description:e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               className="w-full resize-y rounded-md border border-gray-300 px-4 py-3 outline-none focus:border-gray-500"
             />
           </div>
@@ -187,7 +249,7 @@ const PostAd = () => {
             type="submit"
             className="mt-8 w-full rounded-md bg-gray-900 px-4 py-3 font-semibold text-white transition hover:bg-gray-700"
           >
-            Post Ad
+            {editId ? "Update Ad" : "Post Ad"}
           </button>
         </form>
       </div>
