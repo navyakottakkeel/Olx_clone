@@ -12,6 +12,9 @@ const MyAds = () => {
     setAds(savedAds);
   }, []);
 
+  console.log("myads:", localStorage.getItem("myads"));
+console.log("myAds:", localStorage.getItem("myAds"));
+
   const handleDelete = (id) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this ad?"

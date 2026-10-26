@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import uploadToCloudinary from "../../utils/uploadToCloudinary";
 
 const PostAd = () => {
   const navigate = useNavigate();
@@ -10,11 +11,21 @@ const PostAd = () => {
   const [formData, setFormData] = useState({
     title: "",
     price: "",
-    image: "",
+    images: [],
     location: "",
     category: "",
     description: "",
   });
+
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleRemoveImage = (indexToRemove) => {
+    setSelectedImages((previousImages) =>
+      previousImages.filter((_, index) => index !== indexToRemove)
+    );
+  };
 
   useEffect(() => {
     if (!editId) return;
@@ -27,30 +38,62 @@ const PostAd = () => {
       setFormData({
         title: selectedAd.title,
         price: selectedAd.price.toString(),
-        image: selectedAd.image,
+        images:
+          selectedAd.images || (selectedAd.image ? [selectedAd.image] : []),
         location: selectedAd.location,
         category: selectedAd.category,
         description: selectedAd.description,
       });
+
+      setExistingImages(
+        selectedAd.images || (selectedAd.image ? [selectedAd.image] : [])
+      );
+
+      setSelectedImages([]);
     }
   }, [editId]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { title, price, image, location, category, description } = formData;
+    const { title, price, location, category, description } = formData;
 
     if (
       !title.trim() ||
       !price ||
       Number(price) <= 0 ||
-      !image.trim() ||
       !location.trim() ||
       !category ||
       !description.trim()
     ) {
       alert("Please fill in all fields with valid information.");
       return;
+    }
+
+    if (existingImages.length === 0 && selectedImages.length === 0) {
+      alert("Please select at least one image.");
+      return;
+    }
+
+    let finalImages = [];
+    setIsUploading(true);
+
+    try {
+      const uploadImageUrls =
+        selectedImages.length > 0
+          ? await Promise.all(
+              selectedImages.map((imageFile) => uploadToCloudinary(imageFile))
+            )
+          : [];
+
+      finalImages = [...existingImages, ...uploadImageUrls];
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      alert(error.message || "Failed to upload images. Please try again.");
+
+      return;
+    } finally {
+      setIsUploading(false);
     }
 
     const existingAds = JSON.parse(localStorage.getItem("myads")) || [];
@@ -68,6 +111,8 @@ const PostAd = () => {
           ? {
               ...ad,
               ...formData,
+              images: finalImages,
+              image: finalImages[0] || "",
               price: Number(price),
             }
           : ad
@@ -82,6 +127,8 @@ const PostAd = () => {
       const newAd = {
         id: Date.now().toString(),
         ...formData,
+        images: finalImages,
+        image: finalImages[0] || "",
         price: Number(price),
         date: new Date().toISOString(),
       };
@@ -152,23 +199,76 @@ const PostAd = () => {
 
           <div className="mt-6">
             <label
-              htmlFor="image"
+              htmlFor="images"
               className="mb-2 block text-sm font-medium text-gray-700"
             >
-              Product Image URL
+              Product Images
             </label>
 
             <input
-              type="url"
-              id="image"
-              name="image"
-              placeholder="Enter your product image URL"
-              value={formData.image}
-              onChange={(e) =>
-                setFormData({ ...formData, image: e.target.value })
-              }
-              className="w-full rounded-md border border-gray-300 px-4 py-3 outline-none focus:border-gray-500"
+              type="file"
+              id="images"
+              name="images"
+              accept="image/*"
+              multiple
+              onChange={(e) => {
+                const files = Array.from(e.target.files);
+                setSelectedImages(files);
+              }}
+              className="w-full rounded-lg border border-gray-300 p-3"
             />
+
+            <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {existingImages.map((imageUrl, index) => (
+                <div
+                  key={`existing-${index}`}
+                  className="relative overflow-hidden rounded-lg border"
+                >
+                  <img
+                    src={imageUrl}
+                    alt={`Existing product ${index + 1}`}
+                    className="h-32 w-full object-cover"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setExistingImages((previousImages) =>
+                        previousImages.filter(
+                          (_, imageIndex) => imageIndex !== index
+                        )
+                      )
+                    }
+                    className="absolute right-2 top-2 rounded-full bg-white px-2 py-1 text-sm text-red-600 shadow hover:bg-red-50"
+                    aria-label={`Remove existing image ${index + 1}`}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+
+              {selectedImages.map((file, index) => (
+                <div
+                  key={`${file.name}-${index}`}
+                  className="relative overflow-hidden rounded-lg border"
+                >
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={`Selected product ${index + 1}`}
+                    className="h-32 w-full object-cover"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(index)}
+                    className="absolute right-2 top-2 rounded-full bg-white px-2 py-1 text-sm text-red-600 shadow hover:bg-red-50"
+                    aria-label={`Remove image ${index + 1}`}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="mt-6">
@@ -247,9 +347,14 @@ const PostAd = () => {
 
           <button
             type="submit"
+            disabled={isUploading}
             className="mt-8 w-full rounded-md bg-gray-900 px-4 py-3 font-semibold text-white transition hover:bg-gray-700"
           >
-            {editId ? "Update Ad" : "Post Ad"}
+            {isUploading
+              ? "Uploading Images..."
+              : editId
+              ? "Update Ad"
+              : "Post Ad"}
           </button>
         </form>
       </div>

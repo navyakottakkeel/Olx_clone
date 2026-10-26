@@ -8,6 +8,7 @@ const ProductDetails = () => {
   const [showContactModal, setShowContactModal] = useState(false);
   const [message, setMessage] = useState("");
   const [messageError, setMessageError] = useState("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const { wishlist, setWishlist } = useWishlist();
 
@@ -41,6 +42,10 @@ const ProductDetails = () => {
 
   const { id } = useParams();
 
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [id]);
+
   const staticProduct = products.find((product) => String(product.id) === id);
 
   const savedAds = JSON.parse(localStorage.getItem("myads")) || [];
@@ -48,6 +53,12 @@ const ProductDetails = () => {
   const postedAd = savedAds.find((ad) => String(ad.id) === id);
 
   const product = staticProduct || postedAd;
+
+  const productImages = product?.images?.length
+    ? product.images
+    : product?.image
+    ? [product.image]
+    : [];
 
   const handleWishlist = () => {
     const alreadyExists = wishlist.some((item) => item.id === product.id);
@@ -93,14 +104,48 @@ const ProductDetails = () => {
         </button>
         <div className="grid gap-6 md:grid-cols-2">
           {/* Product Image */}
-          <div className="relative overflow-hidden rounded-lg bg-white shadow-sm">
+          <div className="relative h-fit self-start overflow-hidden rounded-lg bg-white shadow-sm">
             <img
-              src={product?.image}
+              src={productImages[currentImageIndex]}
               alt={product?.title}
               className="h-80 w-full object-cover md:h-96"
             />
+
+            {/* Previous Image Button */}
+            {productImages.length > 1 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentImageIndex(
+                    (prev) =>
+                      (prev - 1 + productImages.length) % productImages.length
+                  )
+                }
+                className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/60 px-3 py-2 text-white transition hover:bg-black/80"
+                aria-label="Previous image"
+              >
+                &#10094;
+              </button>
+            )}
+
+            {/* Next Image Button */}
+            {productImages.length > 1 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentImageIndex(
+                    (prev) => (prev + 1) % productImages.length
+                  )
+                }
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/60 px-3 py-2 text-white transition hover:bg-black/80"
+                aria-label="Next image"
+              >
+                &#10095;
+              </button>
+            )}
+
             <span className="absolute bottom-3 right-3 rounded-md bg-black/60 px-2 py-1 text-xs font-medium text-white">
-              1 / 1
+              {currentImageIndex + 1} / {productImages.length}
             </span>
           </div>
 
