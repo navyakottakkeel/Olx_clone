@@ -5,6 +5,7 @@ import Login from "./components/Modal/Login";
 import Navbar from "./components/Navbar/Navbar";
 import { useAuth } from "./context/AuthContext";
 import { WishlistProvider } from "./context/WishlistContext";
+import AllProducts from "./pages/AllProducts/AllProducts";
 import Home from "./pages/Home/Home";
 import MyAds from "./pages/MyAds/MyAds";
 import PostAd from "./pages/PostAd/PostAd";
@@ -26,6 +27,8 @@ const App = () => {
           <Navbar toggleModal={toggleModal} />
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/products" element={<AllProducts />} />
+            <Route path="/category/:category" element={<AllProducts />} />
             <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/my-ads" element={<MyAds />} />

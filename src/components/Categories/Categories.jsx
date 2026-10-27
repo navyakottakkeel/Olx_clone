@@ -37,6 +37,9 @@ const categories = [
   ];
 
 const Categories = () => {
+
+ 
+  
   return (
     <section className="w-full">
       <div className="mx-auto max-w-7xl px-4 py-8">

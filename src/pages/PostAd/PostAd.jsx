@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import uploadToCloudinary from "../../utils/uploadToCloudinary";
 
 const PostAd = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [searchParams] = useSearchParams();
   const editId = searchParams.get("editId");
@@ -99,10 +101,15 @@ const PostAd = () => {
     const existingAds = JSON.parse(localStorage.getItem("myads")) || [];
 
     if (editId) {
-      const adExists = existingAds.some((ad) => ad.id === editId);
+      const selectedAd = existingAds.find((ad) => ad.id === editId);
 
-      if (!adExists) {
+      if (!selectedAd) {
         alert("This ad could not be found.");
+        return;
+      }
+
+      if (selectedAd.userId !== user.uid) {
+        alert("You can only edit your own ads.");
         return;
       }
 
@@ -126,6 +133,7 @@ const PostAd = () => {
     } else {
       const newAd = {
         id: Date.now().toString(),
+        userId: user.uid,
         ...formData,
         images: finalImages,
         image: finalImages[0] || "",
@@ -136,6 +144,18 @@ const PostAd = () => {
       const updatedAds = [...existingAds, newAd];
 
       localStorage.setItem("myads", JSON.stringify(updatedAds));
+
+      setFormData({
+        title: "",
+        price: "",
+        images: [],
+        location: "",
+        category: "",
+        description: "",
+      });
+      
+      setSelectedImages([]);
+      setExistingImages([]);
 
       alert("Your ad has been posted successfully!");
     }
@@ -317,6 +337,7 @@ const PostAd = () => {
               <option value="Bikes">Bikes</option>
               <option value="Mobiles">Mobiles</option>
               <option value="Electronics">Electronics</option>
+              <option value="Camera">Camera</option>
               <option value="Property">Property</option>
               <option value="Jobs">Jobs</option>
               <option value="Fashion">Fashion</option>

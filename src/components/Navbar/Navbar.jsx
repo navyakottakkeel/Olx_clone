@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Navbar.css";
 import logo from "../../assets/symbol.png";
-import search from "../../assets/search1.svg";
-import arrow from "../../assets/arrow-down.svg";
 import searchwt from "../../assets/search.svg";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -10,8 +8,21 @@ import { useNavigate } from "react-router-dom";
 const Navbar = ({ toggleModal }) => {
   const { user, logout } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  const handleSearch = (event) => {
+    event.preventDefault();
+
+    const query = searchTerm.trim();
+
+    if (query) {
+      navigate(`/products?search=${encodeURIComponent(query)}`);
+    } else {
+      navigate("/products");
+    }
+  };
 
   useEffect(() => {
     setShowMenu(false);
@@ -24,42 +35,35 @@ const Navbar = ({ toggleModal }) => {
 
   return (
     <div>
-      <nav className="fixed z-50 w-full overflow-visible p-2 pl-3 pr-3 shadow-md bg-slate-100 border-b-4 border-solid border-b-white">
-        <img src={logo} alt="" className="w-12" />
-        <div className="relative location-search ml-5">
-          <img src={search} alt="" className="absolute top-4 left-2 w-5" />
+      <nav className="fixed top-0 z-50 flex w-full items-center gap-3 border-b border-gray-200 bg-white px-3 py-3 shadow-sm sm:gap-5 sm:px-6 lg:px-8">
+        <img onClick={() => navigate("/")} src={logo} alt="" className="w-12" />
+
+        <form
+          onSubmit={handleSearch}
+          className="mx-4 flex min-w-0 flex-1 overflow-hidden rounded-lg border-2 border-[#002f34] bg-white transition focus-within:shadow-md"
+        >
           <input
             type="text"
-            name=""
-            id=""
-            placeholder="Search city, area, locality..."
-            className="w-[50px] sm:w-[150px] md:w-[250px] lg:w-[270px] p-3 pl-8 pr-8 border-black border-solid border-2 rounded-md placeholder:text-ellipsis focus:outline-none focus:border-teal-300"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Search cars, mobiles, electronics and more..."
+            className="min-w-0 flex-1 px-4 py-3 text-sm text-gray-800 outline-none"
+            aria-label="Search products"
           />
-          <img
-            src={arrow}
-            alt=""
-            className="absolute top-4 right-3 w-5 cursor-pointer"
-          />
-        </div>
-        <div className="ml-5 mr-2 relative w-full main-search">
-          <input
-            type="text"
-            placeholder="Find Cars, Mobile, Phones, and More... "
-            className="w-full p-3 border-black border-solid border-2 rounded-md placeholder:text-ellipsis focus:outline-none focus:border-teal-300"
-            name=""
-            id=""
-          />
-          <div
-            style={{ backgroundColor: "#002f34" }}
-            className="flex justify-center items-center absolute top-0 right-0 h-full rounded-e-md w-12"
+
+          <button
+            type="submit"
+            aria-label="Search"
+            className="flex w-12 shrink-0 items-center justify-center bg-[#002f34] transition hover:bg-[#00474d] sm:w-14"
           >
-            <img src={searchwt} alt="" className="w-5 filter invert" />
-          </div>
-        </div>
-        <div className="mx-1 sm:ml-5 sm:mr-5 relative lang">
-          <p className="font-bold mr-3">English</p>
-          <img src={arrow} alt="" className="w-5 cursor-pointer" />
-        </div>
+            <img
+              src={searchwt}
+              alt=""
+              className="h-5 w-5 brightness-0 invert"
+            />
+          </button>
+        </form>
+
         {user ? (
           <div className="relative">
             <button
@@ -70,33 +74,44 @@ const Navbar = ({ toggleModal }) => {
             </button>
 
             {showMenu && (
-              <div className="absolute right-0 top-10 z-[100] w-48 bg-white border border-gray-200 rounded-md shadow-lg">
+              <div className="absolute right-0 top-12 z-[100] w-56 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
                 <div className="px-4 py-3 border-b">
                   <p className="font-bold text-sm">{user.displayName}</p>
 
                   <p className="text-xs text-gray-500 truncate">{user.email}</p>
                 </div>
 
-                <button className="block w-full text-left px-4 py-3 hover:bg-gray-100">
+                <button
+                  type="button"
+                  className="block w-full px-4 py-3 text-left text-sm text-gray-700 transition hover:bg-gray-100"
+                >
                   My Profile
                 </button>
 
                 <button
-                onClick={() => navigate("/my-ads")}
-                className="block w-full text-left px-4 py-3 hover:bg-gray-100">
+                  onClick={() => {
+                    setShowMenu(false);
+                    navigate("/my-ads");
+                  }}
+                  className="block w-full px-4 py-3 text-left text-sm text-gray-700 transition hover:bg-gray-100"
+                >
                   My Ads
                 </button>
 
                 <button
-                  onClick={() => navigate("/wishlist")}
-                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
+                  onClick={() => {
+                    setShowMenu(false);
+                    navigate("/wishlist");
+                  }}
+                  className="block w-full px-4 py-3 text-left text-sm text-gray-700 transition hover:bg-gray-100"
                 >
                   My Wishlist
                 </button>
 
                 <button
+                  type="button"
                   onClick={handleLogout}
-                  className="block w-full text-left px-4 py-3 hover:bg-gray-100"
+                  className="block w-full border-t border-gray-100 px-4 py-3 text-left text-sm text-red-600 transition hover:bg-red-50"
                 >
                   Logout
                 </button>
@@ -104,9 +119,13 @@ const Navbar = ({ toggleModal }) => {
             )}
           </div>
         ) : (
-          <p onClick={toggleModal} className="font-bold cursor-pointer">
+          <button
+            type="button"
+            onClick={toggleModal}
+            className="shrink-0 rounded-md bg-[#002f34] px-4 py-2 font-semibold text-white transition hover:bg-[#00474d]"
+          >
             Login
-          </p>
+          </button>
         )}
       </nav>
     </div>

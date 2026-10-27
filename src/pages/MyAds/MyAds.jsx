@@ -2,32 +2,46 @@ import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const MyAds = () => {
   const [ads, setAds] = useState([]);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
+    if (!user) {
+      setAds([]);
+      return;
+    }
+  
     const savedAds = JSON.parse(localStorage.getItem("myads")) || [];
-    setAds(savedAds);
-  }, []);
+  
+    const userAds = savedAds.filter((ad) => ad.userId === user.uid);
+  
+    setAds(userAds);
+  }, [user]);
 
   console.log("myads:", localStorage.getItem("myads"));
 console.log("myAds:", localStorage.getItem("myAds"));
 
-  const handleDelete = (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this ad?"
-    );
+const handleDelete = (id) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this ad?"
+  );
 
-    if (!confirmDelete) {
-      return;
-    }
+  if (!confirmDelete) {
+    return;
+  }
 
-    const updatedAds = ads.filter((ad) => ad.id !== id);
-    localStorage.setItem("myads", JSON.stringify(updatedAds));
-    setAds(updatedAds);
-  };
+  const savedAds = JSON.parse(localStorage.getItem("myads")) || [];
+
+  const updatedAds = savedAds.filter((ad) => ad.id !== id);
+
+  localStorage.setItem("myads", JSON.stringify(updatedAds));
+
+  setAds(updatedAds.filter((ad) => ad.userId === user.uid));
+};
 
   return (
     <div className="mx-auto max-w-7xl pt-24">

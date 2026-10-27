@@ -48,7 +48,7 @@ const ProductCard = ({ id, title, price, location, image, category, date }) => {
 
         <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
           <span>{category}</span>
-          <span>{date}</span>
+          <span>{new Date(date).toLocaleDateString("en-IN")}</span>
         </div>
 
         <p className="mt-2 text-sm text-gray-500">{location}</p>
