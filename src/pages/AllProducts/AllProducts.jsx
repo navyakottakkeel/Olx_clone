@@ -2,6 +2,7 @@ import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
+import CategoryNav from "../../components/CategoryNav/CategoryNav";
 import ProductCard from "../../components/ProductCard/ProductCard";
 
 const AllProducts = () => {
@@ -31,7 +32,9 @@ const AllProducts = () => {
   }, []);
 
   return (
-    <div className="pt-28 px-4 md:px-8">
+    
+    <div className="pt-20 px-4 md:px-8">
+      <CategoryNav />
       <h1 className="text-2xl font-bold text-[#002f34]">
         {searchTerm
           ? `Search Results: ${searchTerm}`
