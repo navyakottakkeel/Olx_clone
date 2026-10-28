@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Footer from "./components/Footer/Footer";
 import Login from "./components/Modal/Login";
 import Navbar from "./components/Navbar/Navbar";
 import { useAuth } from "./context/AuthContext";
@@ -34,6 +35,7 @@ const App = () => {
             <Route path="/my-ads" element={<MyAds />} />
             <Route path="/post-ad" element={<PostAd />} />
           </Routes>
+          <Footer />
           <Login toggleModal={toggleModal} status={openModal} />
         </div>
       </BrowserRouter>
