@@ -1,28 +1,39 @@
-import { useEffect } from "react";
-import { createContext, useState, useContext } from "react";
+import { useEffect, useState, useContext, createContext } from "react";
+import { useAuth } from "./AuthContext";
 
 const WishlistContext = createContext();
 
-export const WishlistProvider = ({children}) => {
-    const [wishlist, setWishlist] = useState(() => {
-        const savedWishlist = localStorage.getItem('wishlist');
+export const WishlistProvider = ({ children }) => {
+  const { user } = useAuth();
 
-        return savedWishlist? JSON.parse(savedWishlist) : []
-    });
+  const [wishlist, setWishlist] = useState([]);
 
-    useEffect(() => {
-        localStorage.setItem('wishlist', JSON.stringify(wishlist))
-    },[wishlist])
+  useEffect(() => {
+    if (!user) {
+      setWishlist([]);
+      return;
+    }
 
-    return (
-        <WishlistContext.Provider value={{wishlist, setWishlist}}>
-            {children}
-        </WishlistContext.Provider>
-    )
-}
+    const savedWishlist = localStorage.getItem(`wishlist_${user.uid}`);
+
+    setWishlist(savedWishlist ? JSON.parse(savedWishlist) : []);
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    localStorage.setItem(`wishlist_${user.uid}`, JSON.stringify(wishlist));
+  }, [wishlist, user]);
+
+  return (
+    <WishlistContext.Provider value={{ wishlist, setWishlist }}>
+      {children}
+    </WishlistContext.Provider>
+  );
+};
 
 export const useWishlist = () => {
-    return useContext(WishlistContext)
-}
+  return useContext(WishlistContext);
+};
 
 export default WishlistContext;
