@@ -22,6 +22,7 @@ const PostAd = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const handleRemoveImage = (indexToRemove) => {
     setSelectedImages((previousImages) =>
@@ -60,20 +61,46 @@ const PostAd = () => {
 
     const { title, price, location, category, description } = formData;
 
-    if (
-      !title.trim() ||
-      !price ||
-      Number(price) <= 0 ||
-      !location.trim() ||
-      !category ||
-      !description.trim()
-    ) {
-      alert("Please fill in all fields with valid information.");
-      return;
+    const newErrors = {};
+
+    if (!title.trim()) {
+      newErrors.title = "Product title is required.";
+    }
+
+    if (!price || Number(price) <= 0) {
+      newErrors.price = "Enter a valid price greater than 0.";
+    }
+
+    if (!location.trim()) {
+      newErrors.location = "Location is required.";
+    }
+
+    if (!category) {
+      newErrors.category = "Please select a category.";
+    }
+
+    if (!description.trim()) {
+      newErrors.description = "Product description is required.";
     }
 
     if (existingImages.length === 0 && selectedImages.length === 0) {
-      alert("Please select at least one image.");
+      newErrors.images = "Please select at least one image.";
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorField = Object.keys(newErrors)[0];
+
+      const firstErrorElement = document.getElementById(firstErrorField);
+
+      firstErrorElement?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+
+      firstErrorElement?.focus();
+
       return;
     }
 
@@ -153,7 +180,7 @@ const PostAd = () => {
         category: "",
         description: "",
       });
-      
+
       setSelectedImages([]);
       setExistingImages([]);
 
@@ -172,6 +199,7 @@ const PostAd = () => {
 
         <form
           onSubmit={handleSubmit}
+          noValidate
           className="mt-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
         >
           <div>
@@ -188,11 +216,21 @@ const PostAd = () => {
               name="title"
               placeholder="e.g. iPhone 13"
               value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
-              className="w-full rounded-md border border-gray-300 px-4 py-3 outline-none focus:border-gray-500"
+              onChange={(e) => {
+                setFormData({ ...formData, title: e.target.value });
+
+                setErrors((prev) => ({
+                  ...prev,
+                  title: "",
+                }));
+              }}
+              className={`w-full rounded-md border px-4 py-3 outline-none focus:border-gray-500 ${
+                errors.title ? "border-red-500" : "border-gray-300"
+              }`}
             />
+            {errors.title && (
+              <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+            )}
           </div>
 
           <div className="mt-6">
@@ -210,11 +248,20 @@ const PostAd = () => {
               placeholder="Enter your price"
               min="1"
               value={formData.price}
-              onChange={(e) =>
-                setFormData({ ...formData, price: e.target.value })
-              }
-              className="w-full rounded-md border border-gray-300 px-4 py-3 outline-none focus:border-gray-500"
+              onChange={(e) => {
+                setFormData({ ...formData, price: e.target.value });
+                setErrors((prev) => ({
+                  ...prev,
+                  price: "",
+                }));
+              }}
+              className={`w-full rounded-md border px-4 py-3 outline-none focus:border-gray-500 ${
+                errors.price ? "border-red-500" : "border-gray-300"
+              }`}
             />
+            {errors.price && (
+              <p className="mt-1 text-sm text-red-600">{errors.price}</p>
+            )}
           </div>
 
           <div className="mt-6">
@@ -234,9 +281,19 @@ const PostAd = () => {
               onChange={(e) => {
                 const files = Array.from(e.target.files);
                 setSelectedImages(files);
+
+                setErrors((prev) => ({
+                  ...prev,
+                  images: "",
+                }));
               }}
-              className="w-full rounded-lg border border-gray-300 p-3"
+              className={`w-full rounded-md border px-4 py-3 outline-none focus:border-gray-500 ${
+                errors.images ? "border-red-500" : "border-gray-300"
+              }`}
             />
+            {errors.images && (
+              <p className="mt-1 text-sm text-red-600">{errors.images}</p>
+            )}
 
             <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
               {existingImages.map((imageUrl, index) => (
@@ -305,11 +362,21 @@ const PostAd = () => {
               name="location"
               placeholder="e.g. Kannur, Kerala"
               value={formData.location}
-              onChange={(e) =>
-                setFormData({ ...formData, location: e.target.value })
-              }
-              className="w-full rounded-md border border-gray-300 px-4 py-3 outline-none focus:border-gray-500"
+              onChange={(e) => {
+                setFormData({ ...formData, location: e.target.value });
+
+                setErrors((prev) => ({
+                  ...prev,
+                  location: "",
+                }));
+              }}
+              className={`w-full rounded-md border px-4 py-3 outline-none focus:border-gray-500 ${
+                errors.location ? "border-red-500" : "border-gray-300"
+              }`}
             />
+            {errors.location && (
+              <p className="mt-1 text-sm text-red-600">{errors.location}</p>
+            )}
           </div>
 
           <div className="mt-6">
@@ -324,10 +391,17 @@ const PostAd = () => {
               id="category"
               name="category"
               value={formData.category}
-              onChange={(e) =>
-                setFormData({ ...formData, category: e.target.value })
-              }
-              className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 outline-none focus:border-gray-500"
+              onChange={(e) => {
+                setFormData({ ...formData, category: e.target.value });
+
+                setErrors((prev) => ({
+                  ...prev,
+                  category: "",
+                }));
+              }}
+              className={`w-full rounded-md border px-4 py-3 outline-none focus:border-gray-500 ${
+                errors.category ? "border-red-500" : "border-gray-300"
+              }`}
             >
               <option value="" disabled>
                 Select a category
@@ -343,6 +417,9 @@ const PostAd = () => {
               <option value="Fashion">Fashion</option>
               <option value="Services">Services</option>
             </select>
+            {errors.category && (
+              <p className="mt-1 text-sm text-red-600">{errors.category}</p>
+            )}
           </div>
 
           <div className="mt-6">
@@ -359,11 +436,21 @@ const PostAd = () => {
               rows="4"
               placeholder="Describe your product..."
               value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              className="w-full resize-y rounded-md border border-gray-300 px-4 py-3 outline-none focus:border-gray-500"
+              onChange={(e) => {
+                setFormData({ ...formData, description: e.target.value });
+
+                setErrors((prev) => ({
+                  ...prev,
+                  description: "",
+                }));
+              }}
+              className={`w-full rounded-md border px-4 py-3 outline-none focus:border-gray-500 ${
+                errors.description ? "border-red-500" : "border-gray-300"
+              }`}
             />
+            {errors.description && (
+              <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+            )}
           </div>
 
           <button
