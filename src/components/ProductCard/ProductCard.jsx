@@ -6,17 +6,17 @@ const ProductCard = ({ id, title, price, location, image, category, date }) => {
 
   const navigate = useNavigate();
 
-  const {wishlist, setWishlist} = useWishlist();
+  const {wishlist, addToWishlist, removeFromWishlist} = useWishlist();
 
   const handleWishlist = () => {
     const alreadyExists = wishlist.some((product) => product.id === id )
 
     if(alreadyExists){
-      setWishlist(wishlist.filter((product) => product.id !== id))
+      removeFromWishlist(id)
       return;
     } 
 
-    setWishlist([...wishlist, {id, title, price, location, image, category, date}])
+    addToWishlist({id, title, price, location, image, category, date})
   }
 
   const isWishlisted = wishlist.some((product) => product.id === id)
