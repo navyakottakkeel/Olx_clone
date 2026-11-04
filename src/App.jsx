@@ -1,5 +1,6 @@
 import React from "react";
 import { useState } from "react";
+import { Toaster } from "react-hot-toast";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Footer from "./components/Footer/Footer";
 import Login from "./components/Modal/Login";
@@ -37,6 +38,7 @@ const App = () => {
           </Routes>
           <Footer />
           <Login toggleModal={toggleModal} status={openModal} />
+          <Toaster position="top-right" />
         </div>
       </BrowserRouter>
     </WishlistProvider>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import uploadToCloudinary from "../../utils/uploadToCloudinary";
+import toast from "react-hot-toast";
 
 const PostAd = () => {
   const navigate = useNavigate();
@@ -118,7 +119,7 @@ const PostAd = () => {
       finalImages = [...existingImages, ...uploadImageUrls];
     } catch (error) {
       console.error("Image upload failed:", error);
-      alert(error.message || "Failed to upload images. Please try again.");
+      toast.error(error.message || "Failed to upload images. Please try again.");
 
       return;
     } finally {
@@ -131,12 +132,12 @@ const PostAd = () => {
       const selectedAd = existingAds.find((ad) => ad.id === editId);
 
       if (!selectedAd) {
-        alert("This ad could not be found.");
+        toast.error("This ad could not be found.");
         return;
       }
 
       if (selectedAd.userId !== user.uid) {
-        alert("You can only edit your own ads.");
+        toast.error("You can only edit your own ads.");
         return;
       }
 
@@ -154,7 +155,7 @@ const PostAd = () => {
 
       localStorage.setItem("myads", JSON.stringify(updatedAds));
 
-      alert("Your ad has been updated successfully!");
+      toast.success("Your ad has been updated successfully!");
 
       navigate("/my-ads");
     } else {
@@ -184,7 +185,7 @@ const PostAd = () => {
       setSelectedImages([]);
       setExistingImages([]);
 
-      alert("Your ad has been posted successfully!");
+      toast.success("Your ad has been posted successfully!");
     }
   };
 
