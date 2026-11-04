@@ -119,11 +119,11 @@ const PostAd = () => {
       finalImages = [...existingImages, ...uploadImageUrls];
     } catch (error) {
       console.error("Image upload failed:", error);
-      toast.error(error.message || "Failed to upload images. Please try again.");
-
-      return;
-    } finally {
+      toast.error(
+        error.message || "Failed to upload images. Please try again."
+      );
       setIsUploading(false);
+      return;
     }
 
     const existingAds = JSON.parse(localStorage.getItem("myads")) || [];
@@ -133,11 +133,13 @@ const PostAd = () => {
 
       if (!selectedAd) {
         toast.error("This ad could not be found.");
+        setIsUploading(false);
         return;
       }
 
       if (selectedAd.userId !== user.uid) {
         toast.error("You can only edit your own ads.");
+        setIsUploading(false);
         return;
       }
 
@@ -155,6 +157,7 @@ const PostAd = () => {
 
       localStorage.setItem("myads", JSON.stringify(updatedAds));
 
+      setIsUploading(false);
       toast.success("Your ad has been updated successfully!");
 
       navigate("/my-ads");
@@ -172,7 +175,7 @@ const PostAd = () => {
       const updatedAds = [...existingAds, newAd];
 
       localStorage.setItem("myads", JSON.stringify(updatedAds));
-
+      setIsUploading(false);
       setFormData({
         title: "",
         price: "",
@@ -460,7 +463,9 @@ const PostAd = () => {
             className="mt-8 w-full rounded-md bg-gray-900 px-4 py-3 font-semibold text-white transition hover:bg-gray-700"
           >
             {isUploading
-              ? "Uploading Images..."
+              ? editId
+                ? "Updating..."
+                : "Posting..."
               : editId
               ? "Update Ad"
               : "Post Ad"}
