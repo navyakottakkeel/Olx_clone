@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import toast from "react-hot-toast";
 
 const MyAds = () => {
   const [ads, setAds] = useState([]);
@@ -14,34 +15,67 @@ const MyAds = () => {
       setAds([]);
       return;
     }
-  
+
     const savedAds = JSON.parse(localStorage.getItem("myads")) || [];
-  
+
     const userAds = savedAds.filter((ad) => ad.userId === user.uid);
-  
+
     setAds(userAds);
   }, [user]);
 
-  console.log("myads:", localStorage.getItem("myads"));
-console.log("myAds:", localStorage.getItem("myAds"));
+  const handleDelete = (id) => {
+    const savedAds = JSON.parse(localStorage.getItem("myads")) || [];
 
-const handleDelete = (id) => {
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this ad?"
+    const updatedAds = savedAds.filter((ad) => ad.id !== id);
+
+    localStorage.setItem("myads", JSON.stringify(updatedAds));
+
+    setAds(updatedAds.filter((ad) => ad.userId === user.uid));
+    toast.success("Ad deleted successfully!");
+  };
+
+
+const showDeleteConfirmation = (id) => {
+  toast(
+    (t) => (
+      <div className="flex min-h-48 w-full flex-col justify-center gap-6 rounded-xl border border-gray-200 bg-white p-8 shadow-2xl sm:w-[420px]">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">
+            Confirm Deletion
+          </h2>
+
+          <p className="mt-3 text-base leading-6 text-gray-600">
+            Are you sure you want to delete this ad? This action cannot be undone.
+          </p>
+        </div>
+
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="rounded-lg border border-gray-300 px-5 py-2.5 font-semibold text-gray-700 transition hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={() => {
+              handleDelete(id);
+              toast.dismiss(t.id);
+            }}
+            className="rounded-lg bg-red-600 px-5 py-2.5 font-semibold text-white transition hover:bg-red-700"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ),
+    {
+      duration: Infinity,
+      position: "top-center",
+    }
   );
-
-  if (!confirmDelete) {
-    return;
-  }
-
-  const savedAds = JSON.parse(localStorage.getItem("myads")) || [];
-
-  const updatedAds = savedAds.filter((ad) => ad.id !== id);
-
-  localStorage.setItem("myads", JSON.stringify(updatedAds));
-
-  setAds(updatedAds.filter((ad) => ad.userId === user.uid));
 };
+
 
   return (
     <div className="mx-auto max-w-7xl pt-24">
@@ -119,7 +153,7 @@ const handleDelete = (id) => {
                   </button>
 
                   <button
-                    onClick={() => handleDelete(ad.id)}
+                    onClick={() => showDeleteConfirmation(ad.id)}
                     className="flex-1 rounded-md bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-700"
                   >
                     Delete
